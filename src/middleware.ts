@@ -11,7 +11,7 @@ export default withAuth(
     const isAuthenticated = !!token;
     const isAuthPage = ['/auth/signin', '/auth/signup'].includes(pathname);
 
-    // Redirigir usuarios autenticados fuera de páginas de auth
+    // Si el usuario ya está logueado y entra a signin/signup → redirige al home
     if (isAuthPage && isAuthenticated) {
       return NextResponse.redirect(`${origin}/`);
     }
@@ -25,10 +25,13 @@ export default withAuth(
         const isAuthenticated = !!token;
         const isAuthPage = ['/auth/signin', '/auth/signup'].includes(pathname);
 
-        // Lógica simplificada para páginas de autenticación
+        // 🔑 Deja pasar siempre al home
+        if (pathname === '/') return true;
+
+        // Para signin/signup → solo si NO está autenticado
         if (isAuthPage) return !isAuthenticated;
 
-        // Para todas las demás rutas, verificar autenticación y token
+        // Para todo lo demás → requiere login + token válido
         return isAuthenticated && isApiTokenValid(token.accessToken as string);
       },
     },
@@ -43,5 +46,6 @@ export const config = {
   matcher: [
     '/auth/signin',
     '/auth/signup',
-    '/((?!api|_next/static|_next/image|favicon.ico|images).*)'],
+    '/((?!api|_next/static|_next/image|favicon.ico|images).*)'
+  ],
 };
